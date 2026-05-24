@@ -1,0 +1,10 @@
+# Python environment
+venv/
+ENV/
+.env
+
+# Django database & compiled files
+db.sqlite3
+*.pyc
+__pycache__/
+.DS_Store
