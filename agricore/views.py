@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from django.http import HttpResponse
 from .models import Farmer, Conversation, HealthCase 
@@ -84,6 +86,44 @@ class WhatsAppWebhookView(APIView):
     FR-01: WhatsApp Conversational Advisory Interface.
     Handles incoming messages from Twilio Sandbox
     """
+
+    @swagger_auto_schema(
+        operation_description="Send a mock WhatsApp message to the backend to test the diagnostic pipeline.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['From', 'Body'],
+            properties={
+                'From': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description="The sender's phone number prefixed with country code.",
+                    example="whatsapp:+2349161784554"
+                ),
+                'Body': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description="The raw poultry clinical symptoms query message from the farmer.",
+                    example="My birds have green diarrhea and watery eyes."
+                ),
+                'ProfileName': openapi.Schema(
+                    type=openapi.TYPE_STRING, 
+                    description="The WhatsApp profile display name of the user.",
+                    example="Praise Evesho"
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Valid TwiML XML document back to Twilio gateway",
+                examples={
+                    "application/xml": (
+                        '<?xml version="1.0" encoding="UTF-8"?>\n'
+                        '<Response>\n'
+                        '    <Message>Diagnostic insights text...</Message>\n'
+                        '</Response>'
+                    )
+                }
+            )
+        }
+    )
     def post(self, request):
         # print("DEBUG DATA: ", request.data)
         # Parse incoming data from twilio format 
@@ -142,6 +182,42 @@ class WhatsAppWebhookView(APIView):
 
         return HttpResponse(response_xml, content_type="application/xml")
     
+    @swagger_auto_schema(
+        operation_description="Required verification endpoint for external Webhook setup. Validates secret tokens.",
+        manual_parameters=[
+            openapi.Parameter(
+                name='hub.mode',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description="The webhook mode sent by the provider. Always use 'subscribe'.",
+                example="subscribe"
+            ),
+            openapi.Parameter(
+                name='hub.verify_token',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description="The token used to verify your server ownership.",
+                example="agricare_secret_token"
+            ),
+            openapi.Parameter(
+                name='hub.challenge',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description="A random string/number sent by the provider that your server must echo back.",
+                example="123456"
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Success. Returns back the exact value sent in hub.challenge.",
+                examples={"text/plain": "123456"}
+            ),
+            403: "Verification Token Mismatch"
+        }
+    )
     def get(self, request):
         """
         Required for Meta WhatsApp Business API Webhook Verification.
