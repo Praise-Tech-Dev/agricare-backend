@@ -5,6 +5,7 @@ ENV/
 
 # Django database & compiled files
 db.sqlite3
+staticfiles/
 *.pyc
 __pycache__/
 .DS_Store

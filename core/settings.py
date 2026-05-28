@@ -27,8 +27,16 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-key-for-local-dev-only")
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['ripping-tibia-cannabis.ngrok-free.dev', '127.0.0.1', 'localhost', '.onrender.com']
+ALLOWED_HOSTS = [
+    'ripping-tibia-cannabis.ngrok-free.dev', 
+    '127.0.0.1', 
+    'localhost', 
+    '.onrender.com',
+    ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://agricare-backend-9ino.onrender.com/"
+]
 
 # Application definition
 
