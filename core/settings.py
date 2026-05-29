@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
     ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://agricare-backend-9ino.onrender.com/"
+    "https://agricare-backend-9ino.onrender.com"
 ]
 
 # Application definition
